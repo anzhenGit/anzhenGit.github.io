@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-CN" >
+
+
+<head>
+  <meta charset="utf-8" />
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>
+     anzhen.tech
+  </title>
+  <meta name="generator" content="hexo-theme-yilia-plus">
+  
+  <link rel="shortcut icon" href="/favicon.ico" />
+  
+  
+<link rel="stylesheet" href="/dist/main.css">
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+  
+  
+
+  
+
+<link rel="alternate" href="/atom.xml" title="anzhen.tech" type="application/atom+xml">
+</head>
+
+</html>
+
+<body>
+  <div id="app">
+    <main class="content on">
+      <section class="outer">
+  <article id="page-" class="article article-type-page" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+
+    
+
+    
+
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+
+      
+      <h1 id="并发与多线程"><a href="#并发与多线程" class="headerlink" title="并发与多线程"></a>并发与多线程</h1><h2 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h2><ol>
+<li><p>volatile 有什么用？</p>
+<ul>
+<li>volatile 保证内存可见性和禁止指令重排。volatile 可以提供部分原子性。</li>
+<li>volatile 用于多线程环境下的单次操作(单次读或者单次写)。</li>
+</ul>
+</li>
+<li><p>volatile 变量和 atomic 变量有什么不同？</p>
+<ul>
+<li>volatile 变量，可以确保先行关系，即写操作会发生在后续的读操作之前，但它并不能保证原子性。例如用 volatile 修饰 count 变量，那么 count++ 操作就不是原子性的。</li>
+<li>AtomicInteger 类提供的 atomic 方法，可以让这种操作具有原子性。例如 #getAndIncrement() 方法，会原子性的进行增量操作把当前值加一，其它数据类型和引用变量也可以进行相似操作。</li>
+</ul>
+</li>
+<li><p>Java 中能创建 volatile 数组吗?</p>
+<ul>
+<li>能创建但指向引用,不保证内部元素;</li>
+</ul>
+</li>
+<li><p>volatile 能使得一个非原子操作变成原子操作吗？</p>
+<ul>
+<li>对任意单个volatile变量的读/写具有原子性，但类似于volatile++这种读写复合操作不具有原子性。</li>
+</ul>
+</li>
+<li><p>volatile 修饰符的有过什么实践？</p>
+<ul>
+<li>用 volatile 修饰 long 和 double 变量,使其读写支持原子性;</li>
+<li>状态标志 Boolean 值;</li>
+<li>独立观察,单独监测某个多个线程共享的变量</li>
+<li>轻量级锁</li>
+</ul>
+</li>
+<li><p>volatile 类型变量提供什么保证？</p>
+<ul>
+<li>volatile 变量提供顺序性和可见性保证</li>
+<li>避免指令重排</li>
+<li>可见性保证</li>
+</ul>
+</li>
+<li><p>volatile 和 synchronized 的区别？</p>
+<ul>
+<li>volatile 本质是在告诉 JVM 当前变量在寄存器（工作内存）中的值是不确定的，需要从主存中读取。synchronized 则是锁定当前变量，只有当前线程可以访问该变量，其他线程被阻塞住。</li>
+<li>volatile 仅能使用在变量级别。synchronized 则可以使用在变量、方法、和类级别的。</li>
+<li>volatile 仅能实现变量的修改可见性，不能保证原子性。而synchronized 则可以保证变量的修改可见性和原子性。</li>
+<li>volatile 不会造成线程的阻塞。synchronized 可能会造成线程的阻塞。</li>
+<li>volatile 标记的变量不会被编译器优化。synchronized标记的变量可以被编译器优化。</li>
+</ul>
+</li>
+<li><p>什么场景下可以使用 volatile 替换 synchronized ？</p>
+<ul>
+<li>只需要保证共享资源的可见性的时候可以使用 volatile 替代，synchronized 保证可操作的原子性一致性和可见性。</li>
+<li>volatile 适用于新值不依赖于旧值的情形。</li>
+<li>1 写 N 读。</li>
+<li>不与其他变量构成不变性条件时候使用 volatile 。<h2 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h2></li>
+</ul>
+</li>
+<li><p>synchronized 的原理是什么?</p>
+<ul>
+<li>synchronized是 Java 内置的关键字，它提供了一种独占的加锁方式。</li>
+<li>synchronized的获取和释放锁由JVM实现，用户不需要显示的释放锁，非常方便。</li>
+<li>synchronized 也有一定的局限性。<ul>
+<li>当线程尝试获取锁的时候，如果获取不到锁会一直阻塞。</li>
+<li>如果获取锁的线程进入休眠或者阻塞，除非当前线程异常，否则其他线程尝试获取锁必须一直等待。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>同步方法和同步块，哪个是更好的选择？</p>
+<ul>
+<li>同步块是更好的选择，因为它不会锁住整个对象（当然你也可以让它锁住整个对象）。同步方法会锁住整个对象，哪怕这个类中有多个不相关联的同步块，这通常会导致他们停止执行并需要等待获得这个对象上的锁。</li>
+<li>同步块更要符合开放调用的原则，只在需要锁住的代码块锁住相应的对象，这样从侧面来说也可以避免死锁。</li>
+</ul>
+</li>
+<li><p>当一个线程进入某个对象的一个 synchronized 的实例方法后，其它线程是否可进入此对象的其它方法？</p>
+<ul>
+<li>如果其他方法没有 synchronized 的话，其他线程是可以进入的。</li>
+<li>所以要开放一个线程安全的对象时，得保证每个方法都是线程安全的。、</li>
+</ul>
+</li>
+<li><p>在监视器(Monitor)内部，是如何做线程同步的？</p>
+<ul>
+<li>监视器和锁在 Java 虚拟机中是一块使用的。监视器监视一块同步代码块，确保一次只有一个线程执行同步代码块。每一个监视器都和一个对象引用相关联。线程在获取锁之前不允许执行同步代码。</li>
+</ul>
+</li>
+<li><p>Java 如何实现“自旋”（spin）</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpinLock</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> AtomicReference&lt;Thread&gt; sign =<span class="keyword">new</span> AtomicReference&lt;&gt;();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123; <span class="comment">// &lt;1&gt;</span></span><br><span class="line">        Thread current = Thread.currentThread();</span><br><span class="line">        <span class="keyword">while</span>(!sign .compareAndSet(<span class="keyword">null</span>, current)) &#123;</span><br><span class="line">            <span class="comment">// &lt;1.1&gt;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">unlock</span> <span class="params">()</span> </span>&#123; <span class="comment">// &lt;2&gt;</span></span><br><span class="line">        Thread current = Thread.currentThread();</span><br><span class="line">        sign .compareAndSet(current, <span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>&lt;1&gt; 处，#lock() 方法，如果获得不到锁，就会“死循环”，直到或得到锁为止。考虑到“死循环”会持续占用 CPU ，可能导致其它线程无法获得到 CPU 执行，可以在 &lt;1.1&gt; 处增加 Thread.yiead() 代码段，出让下 CPU 。</li>
+<li>&lt;2&gt; 处，#unlock() 方法，释放锁。</li>
+</ul>
+</li>
+</ol>
+<p>#Java Lock 接口<br>    <img src="media/15847134901438/15852735326621.jpg" alt=""></p>
+<ol>
+<li><p>什么是 Java Lock 接口？</p>
+<ul>
+<li>java.util.concurrent.locks.Lock 接口，比 synchronized 提供更具拓展性的锁操作。它允许更灵活的结构，可以具有完全不同的性质，并且可以支持多个相关类的条件对象。它的优势有：<ul>
+<li>可以使锁更公平。</li>
+<li>可以使线程在等待锁的时候响应中断。</li>
+<li>可以让线程尝试获取锁，并在无法获取锁的时候立即返回或者等待一段时间。</li>
+<li>可以在不同的范围，以不同的顺序获取和释放锁。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>什么是可重入锁（ReentrantLock）？</p>
+<ul>
+<li><p>举例来说明锁的可重入性。代码如下：</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UnReentrant</span></span>&#123;</span><br><span class="line">    Lock lock = <span class="keyword">new</span> Lock();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">outer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        inner();</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">inner</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        <span class="comment">//do something</span></span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>outer() 方法中调用了 #inner() 方法，#outer() 方法先锁住了 lock ，这样 #inner() 就不能再获取 lock 。</p>
+</li>
+<li><p>其实调用 #outer() 方法的线程已经获取了 lock 锁，但是不能在 #inner() 方法中重复利用已经获取的锁资源，这种锁即称之为不可重入。</p>
+</li>
+<li><p>可重入就意味着：线程可以进入任何一个它已经拥有的锁所同步着的代码块。</p>
+</li>
+<li><p>synchronized、ReentrantLock 都是可重入的锁，可重入锁相对来说简化了并发编程的开发。</p>
+</li>
+<li><p>ReenTrantLock 的实现是一种自旋锁，通过循环调用 CAS 操作来实现加锁。它的性能比较好也是因为避免了使线程进入内核态的阻塞状态。想尽办法避免线程进入内核的阻塞状态是我们去分析和理解锁设计的关键钥匙。</p>
+</li>
+</ul>
+</li>
+<li><p>synchronized 和 ReentrantLock 异同？</p>
+<ul>
+<li>相同点<ul>
+<li>都实现了多线程同步和内存可见性语义。</li>
+<li>都是可重入锁。</li>
+</ul>
+</li>
+<li>不同点<ul>
+<li>同步实现机制不同<ul>
+<li>synchronized 通过 Java 对象头锁标记和 Monitor 对象实现同步。</li>
+<li>ReentrantLock 通过CAS、AQS（AbstractQueuedSynchronizer）和 LockSupport（用于阻塞和解除阻塞）实现同步。</li>
+</ul>
+</li>
+<li>可见性实现机制不同<ul>
+<li>synchronized 依赖 JVM 内存模型保证包含共享变量的多线程内存可见性。</li>
+<li>ReentrantLock 通过 ASQ 的 volatile state 保证包含共享变量的多线程内存可见性。</li>
+</ul>
+</li>
+<li>使用方式不同<ul>
+<li>synchronized 可以修饰实例方法（锁住实例对象）、静态方法（锁住类对象）、代码块（显示指定锁对象）。</li>
+<li>ReentrantLock 显示调用 tryLock 和 lock 方法，需要在 finally 块中释放锁。</li>
+</ul>
+</li>
+<li>功能丰富程度不同<ul>
+<li>synchronized 不可设置等待时间、不可被中断（interrupted）。</li>
+<li>ReentrantLock 提供有限时间等候锁（设置过期时间）、可中断锁（lockInterruptibly）、condition（提供 await、condition（提供 await、signal 等方法）等丰富功能</li>
+</ul>
+</li>
+<li>锁类型不同<ul>
+<li>synchronized 只支持非公平锁。</li>
+<li>ReentrantLock 提供公平锁和非公平锁实现。当然，在大部分情况下，非公平锁是高效的选择。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>ReadWriteLock 是什么？</p>
+<ul>
+<li>ReadWriteLock ，读写锁是，用来提升并发程序性能的锁分离技术的 Lock 实现类。可以用于 “多读少写” 的场景，读写锁支持多个读操作并发执行，写操作只能由一个线程来操作。</li>
+<li>ReadWriteLock 对向数据结构相对不频繁地写入，但是有多个任务要经常读取这个数据结构的这类情况进行了优化。ReadWriteLock 使得你可以同时有多个读取者，只要它们都不试图写入即可。如果写锁已经被其他任务持有，那么任何读取者都不能访问，直至这个写锁被释放为止。</li>
+<li>ReadWriteLock 对程序性能的提高主要受制于如下几个因素：<ul>
+<li>数据被读取的频率与被修改的频率相比较的结果。</li>
+<li>读取和写入的时间</li>
+<li>有多少线程竞争</li>
+<li>是否在多处理机器上运行</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Condition 是什么？</p>
+<pre><code>![-w762](media/15847134901438/15852741845639.jpg)</code></pre><h2 id="Java-内存模型"><a href="#Java-内存模型" class="headerlink" title="Java 内存模型"></a>Java 内存模型</h2></li>
+<li><p>两个线程之间是如何通信的呢？</p>
+<ul>
+<li>线程之间的通信方式，目前有共享内存和消息传递两种。<ul>
+<li>在共享内存的并发模型里，线程之间共享程序的公共状态，线程之间通过写-读内存中的公共状态来隐式进行通信。典型的共享内存通信方式，就是通过共享对象进行通信。<br>  <img src="media/15847134901438/15852745337896.png" alt=""></li>
+<li>在消息传递的并发模型里，线程之间没有公共状态，线程之间必须通过明确的发送消息来显式进行通信。在 Java 中典型的消息传递方式，就是 #wait() 和 #notify() ，或者 BlockingQueue 。<br>  <img src="media/15847134901438/15852745812427.png" alt=""></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>为什么代码会重排序？</p>
+<ul>
+<li><p>在执行程序时，为了提供性能，处理器和编译器常常会对指令进行重排序，但是不能随意重排序，不是你想怎么排序就怎么排序，它需要满足以下两个条件：</p>
+<ul>
+<li><p>在单线程环境下不能改变程序运行的结果。</p>
+</li>
+<li><p>存在数据依赖关系的不允许重排序</p>
+<blockquote>
+<p>重排序不会影响单线程环境的执行结果，但是会破坏多线程的执行语义。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Java-并发容器"><a href="#Java-并发容器" class="headerlink" title="Java 并发容器"></a>Java 并发容器</h2><ol>
+<li>Java 中 ConcurrentHashMap 的并发度是什么？<ul>
+<li>锁单个Node节点</li>
+</ul>
+</li>
+<li>ConcurrentHashMap 为何读不用加锁？<ul>
+<li>Node 的 val 和 next 均为 volatile 型。</li>
+<li>tabAt(..,) 和 casTabAt(…) 对应的 Unsafe 操作实现了 volatile 语义。</li>
+</ul>
+</li>
+<li>CopyOnWriteArrayList 可以用于什么应用场景？<ul>
+<li>CopyOnWriteArrayList(免锁容器)的好处之一是当多个迭代器同时遍历和修改这个列表时，不会抛出ConcurrentModificationException 异常。在 CopyOnWriteArrayList 中，写入将导致创建整个底层数组的副本，而源数组将保留在原地，使得复制的数组在被修改时，读取操作可以安全地执行。<ul>
+<li>由于写操作的时候，需要拷贝数组，会消耗内存，如果原数组的内容比较多的情况下，可能导致 ygc 或者 fgc 。</li>
+<li>不能用于实时读的场景，像拷贝数组、新增元素都需要时间，所以调用一个 set 操作后，读取到数据可能还是旧的,虽然 CopyOnWriteArrayList 能做到最终一致性,但是还是没法满足实时性要求。</li>
+</ul>
+</li>
+<li>CopyOnWriteArrayList 透露的思想：</li>
+<li>读写分离，读和写分开</li>
+<li>最终一致性</li>
+<li>使用另外开辟空间的思路，来解决并发冲突<h2 id="Java-阻塞队列"><a href="#Java-阻塞队列" class="headerlink" title="Java 阻塞队列"></a>Java 阻塞队列</h2></li>
+</ul>
+</li>
+<li>什么是阻塞队列？有什么适用场景？<ul>
+<li>阻塞队列（BlockingQueue）是一个支持两个附加操作的队列。这两个附加的操作是：<ul>
+<li>在队列为空时，获取元素的线程会等待队列变为非空。</li>
+<li>当队列满时，存储元素的线程会等待队列可用。</li>
+</ul>
+</li>
+<li>阻塞队列常用于生产者和消费者的场景：<ul>
+<li>生产者是往队列里添加元素的线程，消费者是从队列里拿元素的线程</li>
+<li>阻塞队列就是生产者存放元素的容器，而消费者也只从容器里拿元素。</li>
+</ul>
+</li>
+<li>BlockingQueue 接口，是 Queue 的子接口，它的主要用途并不是作为容器，而是作为线程同步的的工具，因此他具有一个很明显的特性：<ul>
+<li>当生产者线程试图向 BlockingQueue 放入元素时，如果队列已满，则线程被阻塞。</li>
+<li>当消费者线程试图从中取出一个元素时，如果队列为空，则该线程会被阻塞。</li>
+<li>正是因为它所具有这个特性，所以在程序中多个线程交替向BlockingQueue中 放入元素，取出元素，它可以很好的控制线程之间的通信。</li>
+<li>阻塞队列使用最经典的场景，就是 Socket 客户端数据的读取和解析：<ul>
+<li>读取数据的线程不断将数据放入队列。</li>
+<li>然后，解析线程不断从队列取数据解析。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Java 提供了哪些阻塞队列的实现？<ul>
+<li>ArrayBlockingQueue ：一个由数组结构组成的有界阻塞队列。</li>
+<li>LinkedBlockingQueue ：一个由链表结构组成的有界阻塞队列。</li>
+<li>PriorityBlockingQueue ：一个支持优先级排序的无界阻塞队列。</li>
+<li>DelayQueue：支持延时获取元素的无界阻塞队列，即可以指定多久才能从队列中获取当前元素。</li>
+<li>SynchronousQueue：一个不存储元素的阻塞队列。</li>
+</ul>
+</li>
+<li>简述 ConcurrentLinkedQueue 和 LinkedBlockingQueue 的用处和不同之处？<ul>
+<li>阻塞队列，典型例子是 LinkedBlockingQueue 。使用阻塞队列的好处：多线程操作共同的队列时不需要额外的同步，另外就是队列会自动平衡负载，即那边（生产与消费两边）处理快了就会被阻塞掉，从而减少两边的处理速度差距。</li>
+<li>非阻塞队列，典型例子是 ConcurrentLinkedQueue 。当许多线程共享访问一个公共集合时，ConcurrentLinkedQueue 是一个恰当的选择。</li>
+<li>具体的选择，如下：<ul>
+<li>LinkedBlockingQueue 多用于任务队列。<ul>
+<li>单生产者，单消费者</li>
+<li>多生产者，单消费者</li>
+</ul>
+</li>
+<li>ConcurrentLinkedQueue 多用于消息队列。<ul>
+<li>单生产者，多消费者</li>
+<li>多生产者，多消费者</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Java-原子操作类"><a href="#Java-原子操作类" class="headerlink" title="Java 原子操作类"></a>Java 原子操作类</h2><ol>
+<li><p>什么是原子操作？</p>
+<ul>
+<li>原子操作（Atomic Operation），意为”不可被中断的一个或一系列操作”。</li>
+<li>处理器使用基于对缓存加锁或总线加锁的方式，来实现多处理器之间的原子操作。</li>
+<li>在 Java 中，可以通过锁和循环 CAS 的方式来实现原子操作。CAS操作 —— Compare &amp; Set ，或是 Compare &amp; Swap ，现在几乎所有的 CPU 指令都支持 CAS 的原子操作。</li>
+</ul>
+</li>
+<li><p>CAS 操作有什么缺点？</p>
+<ul>
+<li>ABA 问题<ul>
+<li>比如说一个线程 one 从内存位置 V 中取出 A ，这时候另一个线程 two 也从内存中取出 A ，并且 two 进行了一些操作变成了 B ，然后 two 又将 V 位置的数据变成 A ，这时候线程 one 进行 CAS 操作发现内存中仍然是 A ，然后 one 操作成功。尽管线程 one 的 CAS 操作成功，但可能存在潜藏的问题。</li>
+</ul>
+</li>
+<li>循环时间长开销大<ul>
+<li>对于资源竞争严重（线程冲突严重）的情况，CAS 自旋的概率会比较大，从而浪费更多的 CPU 资源，效率低于</li>
+</ul>
+</li>
+<li>只能保证一个共享变量的原子操作<ul>
+<li>当对一个共享变量执行操作时，我们可以使用循环 CAS 的方式来保证原子操作，但是对多个共享变量操作时，循环 CAS 就无法保证操作的原子性，这个时候就可以用锁。<h2 id="Java-并发工具类"><a href="#Java-并发工具类" class="headerlink" title="Java 并发工具类"></a>Java 并发工具类</h2></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Semaphore 是什么？</p>
+<ul>
+<li>Semaphore ，是一种新的同步类，它是一个计数信号。从概念上讲，从概念上讲，信号量维护了一个许可集合。<ul>
+<li>如有必要，在许可可用前会阻塞每一个 #acquire() 方法，然后再获取该许可。</li>
+<li>每个 #release() 方法，添加一个许可，从而可能释放一个正在阻塞的获取者。</li>
+<li>但是，不使用实际的许可对象，Semaphore 只对可用许可的数量进行计数，并采取相应的行动。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>说说 CountDownLatch 原理</p>
+<ul>
+<li>CountDownLatch ，字面意思是减小计数（CountDown）的门闩（Latch）。它要做的事情是，等待指定数量的计数被减少，意味着门闩被打开，然后进行执行。</li>
+<li>CountDownLatch 默认的构造方法是 CountDownLatch(int count) ，其参数表需要减少的计数，主线程调用 #await() 方法告诉 CountDownLatch 阻塞等待指定数量的计数被减少，然后其它线程调用 CountDownLatch 的 #countDown() 方法，减小计数(不会阻塞)。等待计数被减少到零，主线程结束阻塞等待，继续往下执行。</li>
+</ul>
+</li>
+<li><p>说说 CyclicBarrier 原理</p>
+<ul>
+<li>CyclicBarrier ，字面意思是可循环使用（Cyclic）的屏障（Barrier）。它要做的事情是，让一组线程到达一个屏障（也可以叫同步点）时被阻塞，直到最后一个线程到达屏障时，屏障才会开门，所有被屏障拦截的线程才会继续干活。</li>
+<li>CyclicBarrier 默认的构造方法是 CyclicBarrier(int parties) ，其参数表示屏障拦截的线程数量，每个线程调用 #await() 方法告诉 CyclicBarrier 我已经到达了屏障，然后当前线程被阻塞，直到 parties 个线程到达，结束阻塞。</li>
+</ul>
+</li>
+<li><p>CyclicBarrier 和 CountdownLatch 有什么区别？</p>
+<ul>
+<li><p>CyclicBarrier 可以重复使用，而 CountdownLatch 不能重复使用。</p>
+</li>
+<li><p>CountDownLatch 其实可以把它看作一个计数器，只不过这个计数器的操作是原子操作。</p>
+</li>
+<li><p>CyclicBarrier 一个同步辅助类，它允许一组线程互相等待，直到到达某个公共屏障点 (common barrier point)</p>
+<table>
+<thead>
+<tr>
+<th>CountDownLatch</th>
+<th>CyclicBarrier</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>减计数方式</td>
+<td>加计数方式</td>
+</tr>
+<tr>
+<td>计算为 0 时释放所有等待的线程</td>
+<td>计数达到指定值时释放所有等待线程</td>
+</tr>
+<tr>
+<td>计数为 0 时，无法重置</td>
+<td>计数达到指定值时，计数置为 0 重新开始</td>
+</tr>
+<tr>
+<td>调用 #countDown() 方法计数减一，调用 #await() 方法只进行阻塞，对计数没任何影响</td>
+<td>调用 #await() 方法计数加 1 ，若加 1 后的值不等于构造方法的值，则线程阻塞</td>
+</tr>
+<tr>
+<td>不可重复利用</td>
+<td>可重复利用</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Java-线程池"><a href="#Java-线程池" class="headerlink" title="Java 线程池"></a>Java 线程池</h2><p><img src="media/15847134901438/15852766289037.png" alt=""></p>
+<ol>
+<li><p>什么是 Executor 框架？</p>
+<ul>
+<li>Executor 框架，是一个根据一组执行策略调用，调度，执行和控制的异步任务的框架。</li>
+<li>无限制的创建线程，会引起应用程序内存溢出。所以创建一个线程池是个更好的的解决方案，因为可以限制线程的数量并且可以回收再利用这些线程。利用 Executor 框架，可以非常方便的创建一个线程池。</li>
+</ul>
+</li>
+<li><p>为什么使用 Executor 框架？</p>
+<ul>
+<li>每次执行任务创建线程 new Thread() 比较消耗性能，创建一个线程是比较耗时、耗资源的。</li>
+<li>调用 new Thread() 创建的线程缺乏管理，被称为野线程，而且可以无限制的创建，线程之间的相互竞争会导致过多占用系统资源而导致系统瘫痪，还有线程之间的频繁交替也会消耗很多系统资源。</li>
+<li>接使用 new Thread() 启动的线程不利于扩展，比如定时执行、定期执行、定时定期执行、线程中断等都不便实现。</li>
+</ul>
+</li>
+<li><p>在 Java 中 Executor 和 Executors 的区别？</p>
+<ul>
+<li>Executors 是 Executor 的工具类，不同方法按照我们的需求创建了不同的线程池，来满足业务的需求。</li>
+<li>Executor 是接口对象，能执行我们的线程任务。<ul>
+<li>ExecutorService 接口，继承了 Executor 接口，并进行了扩展，提供了更多的方法我们能获得任务执行的状态并且可以获取任务的返回值。</li>
+<li>使用 ThreadPoolExecutor ，可以创建自定义线程池。</li>
+<li>Future 表示异步计算的结果，他提供了检查计算是否完成的方法，以等待计算的完成，并可以使用 #get() 方法，获取计算的结果。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>创建线程池的几种方式？</p>
+<ul>
+<li>Executors 创建的线程池，分成普通任务线程池，和定时任务线程池。<ul>
+<li>普通任务线程池<ul>
+<li>1、#newFixedThreadPool(int nThreads) 方法，创建一个固定长度的线程池。每当提交一个任务就创建一个线程，直到达到线程池的最大数量，这时线程规模将不再变化。当线程发生未预期的错误而结束时，线程池会补充一个新的线程。</li>
+<li>2、#newCachedThreadPool() 方法，创建一个可缓存的线程池。如果线程池的规模超过了处理需求，将自动回收空闲线程。当需求增加时，则可以自动添加新线程。线程池的规模不存在任何限制。</li>
+<li>3、#newSingleThreadExecutor() 方法，创建一个单线程的线程池。它创建单个工作线程来执行任务，如果这个线程异常结束，会创建一个新的来替代它。它的特点是，能确保依照任务在队列中的顺序来串行执行。</li>
+</ul>
+</li>
+<li>定时任务线程池<ul>
+<li>4、#newScheduledThreadPool(int corePoolSize) 方法，创建了一个固定长度的线程池，而且以延迟或定时的方式来执行任务，类似 Timer 。</li>
+<li>5、#newSingleThreadExecutor() 方法，创建了一个固定长度为 1 的线程池，而且以延迟或定时的方式来执行任务，类似 Timer 。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>如何使用 ThreadPoolExecutor 创建线程池？</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,</span></span></span><br><span class="line"><span class="function"><span class="params">                      <span class="keyword">int</span> maximumPoolSize,</span></span></span><br><span class="line"><span class="function"><span class="params">                      <span class="keyword">long</span> keepAliveTime,</span></span></span><br><span class="line"><span class="function"><span class="params">                      TimeUnit unit,</span></span></span><br><span class="line"><span class="function"><span class="params">                      BlockingQueue&lt;Runnable&gt; workQueue,</span></span></span><br><span class="line"><span class="function"><span class="params">                      ThreadFactory threadFactory,</span></span></span><br><span class="line"><span class="function"><span class="params">                      RejectedExecutionHandler handler)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (corePoolSize &lt; <span class="number">0</span> ||</span><br><span class="line">        maximumPoolSize &lt;= <span class="number">0</span> ||</span><br><span class="line">        maximumPoolSize &lt; corePoolSize ||</span><br><span class="line">        keepAliveTime &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    <span class="keyword">if</span> (workQueue == <span class="keyword">null</span> || threadFactory == <span class="keyword">null</span> || handler == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">this</span>.corePoolSize = corePoolSize;</span><br><span class="line">    <span class="keyword">this</span>.maximumPoolSize = maximumPoolSize;</span><br><span class="line">    <span class="keyword">this</span>.workQueue = workQueue;</span><br><span class="line">    <span class="keyword">this</span>.keepAliveTime = unit.toNanos(keepAliveTime);</span><br><span class="line">    <span class="keyword">this</span>.threadFactory = threadFactory;</span><br><span class="line">    <span class="keyword">this</span>.handler = handler;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>corePoolSize 参数，核心线程数大小，当线程数 &lt; corePoolSize ，会创建线程执行任务。</li>
+<li>maximumPoolSize 参数，最大线程数， 当线程数 &gt;= corePoolSize 的时候，会把任务放入 workQueue 队列中。</li>
+<li>keepAliveTime 参数，保持存活时间，当线程数大于 corePoolSize 的空闲线程能保持的最大时间。</li>
+<li>unit 参数，时间单位。</li>
+<li>workQueue 参数，保存任务的阻塞队列。</li>
+<li>handler 参数，超过阻塞队列的大小时，使用的拒绝策略。</li>
+<li>threadFactory 参数，创建线程的工厂。</li>
+</ul>
+</li>
+<li><p>ThreadPoolExecutor 有哪些拒绝策略？</p>
+<ul>
+<li>ThreadPoolExecutor 默认有四个拒绝策略：<ul>
+<li>ThreadPoolExecutor.AbortPolicy() ，直接抛出异常 RejectedExecutionException 。</li>
+<li>ThreadPoolExecutor.CallerRunsPolicy() ，直接调用 run 方法并且阻塞执行。</li>
+<li>ThreadPoolExecutor.DiscardPolicy() ，直接丢弃后来的任务。</li>
+<li>ThreadPoolExecutor.DiscardOldestPolicy() ，丢弃在队列中队首的任务。</li>
+<li>如果有需要，可以自己实现 RejectedExecutionHandler 接口，实现自定义的拒绝逻辑</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>线程池的关闭方式有几种？</p>
+<ul>
+<li>ThreadPoolExecutor 提供了两个方法，用于线程池的关闭，分别是：<ul>
+<li>shutdown() 方法，不会立即终止线程池，而是要等所有任务缓存队列中的任务都执行完后才终止，但再也不会接受新的任务。</li>
+<li>shutdownNow() 方法，立即终止线程池，并尝试打断正在执行的任务，并且清空任务缓存队列，返回尚未执行的任务。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Java 线程池大小为何会大多被设置成 CPU 核心数 +1 ？</p>
+<ul>
+<li>如果是 CPU 密集型应用，则线程池大小设置为 N+1<ul>
+<li>因为 CPU 密集型任务使得 CPU 使用率很高，若开过多的线程数，只能增加上下文切换的次数，因此会带来额外的开销。</li>
+</ul>
+</li>
+<li>如果是 IO 密集型应用，则线程池大小设置为 2N+1<ul>
+<li>IO密 集型任务 CPU 使用率并不高，因此可以让 CPU 在等待 IO 的时候去处理别的任务，充分利用 CPU 时间。</li>
+</ul>
+</li>
+<li>如果是混合型应用，那么分别创建线程池<ul>
+<li>可以将任务分成 IO 密集型和 CPU 密集型任务，然后分别用不同的线程池去处理。 只要分完之后两个任务的执行时间相差不大，那么就会比串行执行来的高效。</li>
+<li>因为如果划分之后两个任务执行时间相差甚远，那么先执行完的任务就要等后执行完的任务，最终的时间仍然取决于后执行完的任务，而且还要加上任务拆分与合并的开销，得不偿失。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>线程池容量的动态调整？</p>
+<ul>
+<li>ThreadPoolExecutor 提供了动态调整线程池容量大小的方法：<ul>
+<li>setCorePoolSize：设置核心池大小。</li>
+<li>setMaximumPoolSize：设置线程池最大能创建的线程数目大小。</li>
+</ul>
+</li>
+<li>当上述参数从小变大时，ThreadPoolExecutor 进行线程赋值，还可能立即创建新的线程来执行任务。</li>
+</ul>
+</li>
+<li><p>什么是 Callable、Future、FutureTask ？ </p>
+<ul>
+<li>Callable: 可以认为是带有回调的 Runnable 。</li>
+<li>Future: 表示异步任务，是还没有完成的任务给出的未来结果。所以说 Callable 用于产生结果，Future 用于获取结果。</li>
+<li>FutureTask; 表示一个可以取消的异步运算。<ul>
+<li>它有启动和取消运算、查询运算是否完成和取回运算结果等方法。只有当运算完成的时候结果才能取回，如果运算尚未完成 get 方法将会阻塞。</li>
+<li>一个 FutureTask 对象，可以对调用了 Callable 和 Runnable 的对象进行包装，由于 FutureTask 也是继承了 Runnable 接口，所以它可以提交给 Executor 来执行。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>线程池执行任务的过程？</p>
+<ul>
+<li>刚创建时，里面没有线程调用 execute() 方法，添加任务时：<ul>
+<li>如果正在运行的线程数量小于核心参数 corePoolSize ，继续创建线程运行这个任务<ul>
+<li>否则，如果正在运行的线程数量大于或等于 corePoolSize ，将任务加入到阻塞队列中。<ul>
+<li>否则，如果队列已满，同时正在运行的线程数量小于核心参数 maximumPoolSize ，继续创建线程运行这个任务。<ul>
+<li>否则，如果队列已满，同时正在运行的线程数量大于或等于 maximumPoolSize ，根据设置的拒绝策略处理。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>完成一个任务，继续取下一个任务处理。<ul>
+<li>没有任务继续处理，线程被中断或者线程池被关闭时，线程退出执行，如果线程池被关闭，线程结束。</li>
+<li>否则，判断线程池正在运行的线程数量是否大于核心线程数，如果是，线程结束，否则线程阻塞。因此线程池任务全部执行完成后，继续留存的线程池大小为 corePoolSize 。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>线程池中 submit 和 execute 方法有什么区别？</p>
+<ul>
+<li>两个方法都可以向线程池提交任务。<ul>
+<li>execute(…) 方法，返回类型是 void ，它定义在 Executor 接口中。</li>
+<li>submit(…) 方法，可以返回持有计算结果的 Future 对象，它定义在 ExecutorService 接口中，它扩展了 Executor 接口，其它线程池类像 ThreadPoolExecutor 和 ScheduledThreadPoolExecutor 都有这些方法。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>如果你提交任务时，线程池队列已满，这时会发生什么？</p>
+<ul>
+<li>重点在于线程池的队列是有界还是无界的。</li>
+</ul>
+</li>
+<li><p>Fork/Join 框架是什么？</p>
+<ul>
+<li>Fork/Join 框架是一个实现了 ExecutorService接口 的多线程处理器。它可以把一个大的任务划分为若干个小的任务并发执行，充分利用可用的资源，进而提高应用的执行效率。</li>
+<li>Fork 就是把一个大任务切分为若干子任务并行的执行</li>
+<li>Join 就是合并这些子任务的执行结果，最后得到这个大任务的结果。</li>
+<li>比如计算 1+2+…＋10000 ，可以分割成 10 个子任务，每个子任务分别对 1000 个数进行求和，最终汇总这 10 个子任务的结果。</li>
+</ul>
+</li>
+<li><p>如何让一段程序并发的执行，并最终汇总结果？</p>
+<ul>
+<li>1、CountDownLatch：允许一个或者多个线程等待前面的一个或多个线程完成，构造一个 CountDownLatch 时指定需要 countDown 的点的数量，每完成一点就 countDown 一下。当所有点都完成，CountDownLatch 的 #await() 就解除阻塞。</li>
+<li>2、CyclicBarrier：可循环使用的 Barrier ，它的作用是让一组线程到达一个 Barrier 后阻塞，直到所有线程都到达 Barrier 后才能继续执行。</li>
+<li>3、Fork/Join 框架，fork 把大任务分解成多个小任务，然后汇总多个小任务的结果得到最终结果。使用一个双端队列，当线程空闲时从双端队列的另一端领取任务。</li>
+</ul>
+</li>
+</ol>
+
+      
+      <!-- reward -->
+      
+      <div id="reward-btn">
+        打赏
+      </div>
+      
+    </div>
+    
+    
+      <!-- copyright -->
+      
+        <div class="declare">
+          <ul class="post-copyright">
+            <li>
+              <i class="ri-copyright-line"></i>
+              <strong>版权声明： </strong s>
+              本博客所有文章除特别声明外，均采用 <a href="https://www.apache.org/licenses/LICENSE-2.0.html" rel="external nofollow"
+                target="_blank">Apache License 2.0</a> 许可协议。转载请注明出处！
+            </li>
+          </ul>
+        </div>
+        
+    <footer class="article-footer">
+      
+          
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://anzhen.tech/interview/%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%A4%9A%E7%BA%BF%E7%A8%8B.html" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>
+      
+      
+
+    </footer>
+
+  </div>
+
+  
+  
+
+  
+
+  
+  
+<!-- valine评论 -->
+<div id="vcomments-box">
+    <div id="vcomments">
+    </div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='https://cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        app_id: '',
+        app_key: '',
+        path: window.location.pathname,
+        notify: 'false',
+        verify: 'false',
+        avatar: 'mp',
+        placeholder: '给我的文章加点评论吧~',
+        recordIP: true
+    });
+    const infoEle = document.querySelector('#vcomments .info');
+    if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+        infoEle.childNodes.forEach(function (item) {
+            item.parentNode.removeChild(item);
+        });
+    }
+</script>
+<style>
+    #vcomments-box {
+        padding: 5px 30px;
+    }
+
+    @media screen and (max-width: 800px) {
+        #vcomments-box {
+            padding: 5px 0px;
+        }
+    }
+
+    #vcomments-box #vcomments {
+        background-color: #fff;
+    }
+
+    .v .vlist .vcard .vh {
+        padding-right: 20px;
+    }
+
+    .v .vlist .vcard {
+        padding-left: 10px;
+    }
+</style>
+
+  
+
+  
+
+</article>
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul class="list-inline">
+      <li>
+        &copy;
+        2015-2020
+        Anzhen
+      </li>
+      <li>
+        
+        Powered by
+        
+        
+        <a href="https://hexo.io" target="_blank">Hexo</a> Theme <a href="https://github.com/Shen-Yu/hexo-theme-ayer" target="_blank">Ayer</a>
+        
+      </li>
+    </ul>
+    <ul class="list-inline">
+      <li>
+        
+        
+        <span>
+  <i>PV:<span id="busuanzi_value_page_pv"></span></i>
+  <i>UV:<span id="busuanzi_value_site_uv"></span></i>
+</span>
+        
+      </li>
+      
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>
+      <div class="float_btns">
+        <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+      </div>
+    </main>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/ayer-side.svg" alt="anzhen.tech"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/interview">面试</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/source-code">源码</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/adg">算法</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2019/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="搜索">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <script>
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        document.querySelector('.content').classList.remove('on');
+        document.querySelector('.sidebar').classList.remove('on');
+      }
+    </script>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="/images/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script>
+  try {
+    var typed = new Typed("#subtitle", {
+      strings: ['越努力，越美好', '', ''],
+      startDelay: 0,
+      typeSpeed: 200,
+      loop: true,
+      backSpeed: 100,
+      showCursor: true
+    });
+  } catch (err) {
+  }
+
+</script>
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script>
+
+
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script type="text/javascript" src="https://js.users.51.la/20544303.js"></script>
+
+    
+  </div>
+</body>
+
+</html>
